@@ -1,0 +1,5 @@
+vendor_id,name,gstin,status,payment_terms_days
+V001,Bharat Office Supplies Pvt Ltd,07AABCB1234F1Z5,active,30
+V002,Nimbus Cloud Services LLP,29AAFFN5678K1Z2,active,45
+V003,Shakti Logistics,27AAKFS9012L1Z8,active,15
+V004,Apex Print Solutions,24AACCA4321P1Z3,blocked,30

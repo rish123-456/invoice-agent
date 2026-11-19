@@ -1,0 +1,5 @@
+po_number,vendor_id,po_date,description,subtotal,allows_partial_billing,status
+PO-4501,V001,2026-10-01,Office furniture - Delhi HQ,390000,no,open
+PO-4502,V002,2026-09-15,Cloud migration services (milestone billing),600000,yes,open
+PO-4503,V003,2026-10-05,Freight - Mumbai to Pune (12 trips),180000,yes,open
+PO-4504,V001,2026-10-10,Printer toner cartridges,128000,no,open
