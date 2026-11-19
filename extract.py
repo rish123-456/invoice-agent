@@ -31,6 +31,21 @@ def to_num(s: str) -> float:
 
 
 # ------------------------------------------------------------------ text
+def scan_variants(img):
+    """Two cleaned versions of a scan. Different Tesseract versions do best on
+    different ones, so we OCR both and keep whichever yields more fields."""
+    from PIL import ImageFilter, ImageOps
+    g = ImageOps.autocontrast(img.convert("L"), cutoff=1)
+    yield "contrast", g
+    yield "binarised", g.filter(ImageFilter.MedianFilter(3)).point(lambda v: 255 if v > 140 else 0)
+
+
+def _score(lines):
+    f = parse_invoice(lines)
+    keys = ("invoice_number", "invoice_date", "po_number", "vendor_gstin", "subtotal", "tax", "total")
+    return sum(f.get(k) is not None for k in keys) + len(f["line_items"])
+
+
 def pdf_to_lines(pdf_bytes: bytes) -> tuple[list[str], str]:
     """Return (lines, method). Rebuilds visual lines from word positions so
     table rows stay on one line; falls back to OCR for image-only pages."""
@@ -48,13 +63,18 @@ def pdf_to_lines(pdf_bytes: bytes) -> tuple[list[str], str]:
         return lines, "text-layer"
     if pytesseract is None:
         raise RuntimeError("Scanned PDF and OCR (pytesseract/tesseract) is not installed")
-    lines = []
-    for page in doc:
-        pix = page.get_pixmap(dpi=300)
-        img = Image.open(io.BytesIO(pix.tobytes("png")))
-        txt = pytesseract.image_to_string(img, config="--psm 6")
-        lines += [l.strip() for l in txt.splitlines() if l.strip()]
-    return lines, "ocr"
+    best = None
+    for name in ("contrast", "binarised"):
+        lines = []
+        for page in doc:
+            img = Image.open(io.BytesIO(page.get_pixmap(dpi=300).tobytes("png")))
+            v = dict(scan_variants(img))[name]
+            txt = pytesseract.image_to_string(v, config="--psm 6")
+            lines += [l.strip() for l in txt.splitlines() if l.strip()]
+        s = _score(lines)
+        if best is None or s > best[0]:
+            best = (s, lines, name)
+    return best[1], f"ocr ({best[2]})"
 
 
 # ------------------------------------------------------------------ parse
@@ -88,9 +108,9 @@ def parse_invoice(lines: list[str]) -> dict:
     text = "\n".join(lines)
     f: dict = {"line_items": [], "notes": []}
 
-    m = re.search(r"(?:invoice\s*(?:no\.?|number|#)|bill\s*no\.?)\s*[:#]?\s*([A-Z0-9][A-Z0-9/\-]*\d[A-Z0-9/\-]*)",
+    m = re.search(r"(?:[il1|]nvoice\s*(?:n[o0]\.?|number|#)|bill\s*n[o0]\.?)\s*[:;.,#]?\s*([A-Z0-9][A-Z0-9/\-]*\d[A-Z0-9/\-]*)",
                   text, re.I)
-    f["invoice_number"] = m.group(1) if m else None
+    f["invoice_number"] = m.group(1).rstrip("-/") if m else None
 
     m = re.search(r"(?:invoice\s*date|dated|date)\s*:?\s*(\d{1,2}[-/ .][A-Za-z]{3,9}[-/ .]\d{4}|\d{1,2}[/.-]\d{1,2}[/.-]\d{4}|\d{4}-\d{2}-\d{2})",
                   text, re.I)

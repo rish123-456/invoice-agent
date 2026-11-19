@@ -99,7 +99,8 @@ def run_pipeline(pdf_bytes: bytes, file_name: str, pace: float = 0.0):
         ev = {"type": "stage", "stage": name, "status": status, "detail": detail, "data": data or {},
               "checks": [c for c in r.checks if c.get("_stage") is None], "at": datetime.now().isoformat(timespec="seconds")}
         for c in r.checks:
-            c["_stage"] = name
+            if c.get("_stage") is None:
+                c["_stage"] = name
         r.stages.append({k: v for k, v in ev.items() if k != "type"})
         if pace:
             time.sleep(pace)
@@ -127,7 +128,7 @@ def run_pipeline(pdf_bytes: bytes, file_name: str, pace: float = 0.0):
         yield stage("Extract text", "fail", str(e))
         yield from _finish(r, ctx, fields, t0)
         return
-    if method == "ocr":
+    if method.startswith("ocr"):
         r.check("Document type", "info", "No text layer — scanned image, read with OCR. Lower confidence on small print.")
     yield stage("Extract text", status_of(None), f"{method} · {len(lines)} lines", {"raw_text": "\n".join(lines)})
 
@@ -245,7 +246,7 @@ def run_pipeline(pdf_bytes: bytes, file_name: str, pace: float = 0.0):
                 "review", "Check with vendor whether this is a re-bill")
     else:
         r.check("Duplicate check", "pass", f"No match among {len(prior)} prior invoice(s) from this vendor")
-    yield stage("Duplicate check", status_of(None), f"key {key}")
+    yield stage("Duplicate check", status_of(None), f"key {key}" if key else "no invoice number — amount/date check only")
 
     if hard:
         yield from _finish(r, ctx, fields, t0)

@@ -52,7 +52,7 @@ raw text and the original document. **Dashboard** with history, decision mix, to
 
 | Sample | Scenario | Expected |
 |---|---|---|
-| 02 | **Scanned image, no PO number, rate +1.3%.** OCR; vendor GSTIN unreadable → matched by name; PO inferred; price within tolerance | Needs review — confirm PO |
+| 02 | **Scanned image, no PO number, rate +1.3%.** OCR (two image clean-ups, best one kept); vendor by GSTIN or, if unreadable, by name; PO inferred; price within tolerance | Needs review — confirm PO |
 | 03 → 04 | **Split PO / milestone billing.** M1 ₹2L approved; M2+3 bills ₹4.5L against ₹4L remaining | Needs review — over-bill ₹50,000 |
 | 05 | **Disguised duplicate** of 01: different layout, `INV/1042`, re-dated 3 days later | Rejected — duplicate |
 | 06 | **GST-inclusive prices + price variance.** ₹4,071 incl. GST → ₹3,450 pre-tax vs PO ₹3,200 (+7.8%) | Needs review — credit note ₹10,000 |

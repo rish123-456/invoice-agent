@@ -48,8 +48,9 @@ four lakh, or get the PO amended.
 
 ### 2:30 – Edge 3: scanned, no PO (02) · ~45 s
 This one is a **scanned image**. There's no text layer, so the agent runs **OCR**.
-Two problems: the vendor's GSTIN is too blurry to read, and there's **no PO number**.
-So it identifies the vendor **by name**, then looks at that vendor's open POs and **infers** the
+It OCRs two cleaned versions of the scan and keeps whichever reads more fields. It identifies the
+vendor by GSTIN, and if the GSTIN were too blurry it would fall back to **matching by name**.
+The real problem: there's **no PO number**. So it looks at that vendor's open POs and **infers** the
 freight PO from the line description and amount. The rate is 1.3% higher than the PO, which is
 within my 2% tolerance.
 It could pay this, but it **inferred** the PO, so it doesn't auto-approve. It asks a person for a
