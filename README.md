@@ -61,7 +61,7 @@ raw text and the original document. **Dashboard** with history, decision mix, to
 
 ## Demo script (5 min)
 
-Full narration: `DEMO_SCRIPT.md`. Hands-free clicking: `python autopilot.py [url]` (press ENTER to advance).
+Hands-free clicking: `python autopilot.py [url]` (press ENTER to advance).
 
 
 Click **Reset demo ledger** first. Run in this order (duplicates and balances depend on history):

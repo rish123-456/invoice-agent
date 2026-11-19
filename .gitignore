@@ -1,3 +1,4 @@
 runs.db
 __pycache__/
 .env
+DEMO_SCRIPT.md
